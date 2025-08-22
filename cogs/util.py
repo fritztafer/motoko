@@ -15,12 +15,16 @@ class Util(commands.Cog):
     @locks.sync_lock()
     @locks.guild_lock()
     async def help(self, ctx: commands.Context):
-        help = (
-            'Prepend commands with:''\n'
-            '\t''/       (slash)''\n'
-            '\t''.       (period)''\n'
-            '\t''@motoko (mention)'
-        )
+        help = [
+            'Prepend commands with:',
+            '    /       (slash)',
+            '    .       (period)',
+            '    @motoko (mention)',
+            '\n'
+        ]
+        for command in self.motoko.walk_commands():
+            help.append(f'{command.name} - {command.description}')
+        help = '\n'.join(help)
         await ctx.reply(f'```{help}```')
 
     # about
