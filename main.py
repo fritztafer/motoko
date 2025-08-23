@@ -1,8 +1,7 @@
 # main.py
 import discord
 from discord.ext import commands
-import logging
-import logging.handlers
+import logging, logging.handlers
 import asyncio
 import os
 import fetches, globals
@@ -13,9 +12,9 @@ class Motoko(commands.Bot):
 
     async def setup_hook(self):
         globals.gids = await fetches.Motoko.fetch_guild_ids(self)
-        for f in os.listdir('./cogs'):
-            if f.endswith('.py'):
-                await self.load_extension(f'cogs.{f[:-3]}')
+        for file in os.listdir('./cogs'):
+            if file.endswith('.py'):
+                await self.load_extension(f'cogs.{file[:-3]}')
         print(f'Major logged into Discord as {self.user} connected to {len(globals.gids)} servers')
 
 async def main():
