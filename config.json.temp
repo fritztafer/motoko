@@ -1,6 +1,14 @@
 {
     "TOKEN": "",
-    "DEVELOPERS": {
+    "DEVELOPER": {
+        "USERS": [
+            
+        ],
+        "GUILDS": [
+            
+        ]
+    },
+    "BLACKLIST": {
         "USERS": [
             
         ],

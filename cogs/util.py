@@ -1,9 +1,9 @@
 # cogs/util.py
 import discord
 from discord.ext import commands
+import decorators, fetches
 from datetime import timedelta
-import locks
-import json, requests
+import random
 
 class Util(commands.Cog):
     def __init__(self, motoko: commands.Bot):
@@ -11,8 +11,7 @@ class Util(commands.Cog):
 
     # help
     @commands.hybrid_command(name='help', aliases=['motoko','commands'], description='return available commands')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def help(self, ctx: commands.Context):
         help = [
             'Prepend commands with:',
@@ -28,40 +27,51 @@ class Util(commands.Cog):
 
     # about
     @commands.hybrid_command(name='about', aliases=['why'], description='return info about motoko')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def about(self, ctx: commands.Context):
-        about = 'I am a Discord bot inspired by Major Motoko Kusanagi from the 1995 animated film Ghost in the Shell. I was developed by <@234456546715762688> using the discord.py wrapper.'
-        await ctx.reply(about)
+        about = [
+            'I am a Discord bot inspired by Major Kusanagi from Ghost in the Shell.',
+            'Developed by <@234456546715762688> using the discord.py wrapper.',
+            'You may add me to your server with this link:',
+            'https://discord.com/oauth2/authorize?client_id=1265358841286230016&permissions=0&integration_type=0&scope=bot'
+        ]
+        await ctx.reply('\n'.join(about))
 
     # hello
     @commands.hybrid_command(name='hello', aliases=['hi','yo','hey','sup'], description='return a greeting')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def hello(self, ctx: commands.Context, user: discord.Member=None):
         user = user or ctx.author
-        await ctx.send(f'hey there {user.mention} 😏')
+        greets = [
+            'Reporting in',
+            'What\'s your status',
+            'Good to hear from you',
+            'Took you long enough',
+            'You\'re clingier than Batou',
+            'Get to the point',
+            'I read you',
+            'Hey there',
+            'Yes'
+        ]
+        await ctx.send(f'{random.choice(greets)} {user.mention}')
 
     # ping
     @commands.hybrid_command(name='ping', aliases=['latency','report'], description='return latency')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def ping(self, ctx: commands.Context):
         latency = round(self.motoko.latency * 1000)
         await ctx.reply(f'I read you with **{latency} ms** of latency')
     
     # cat
     @commands.hybrid_command(name='cat', description='return cat fact')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def cat(self, ctx: commands.Context):
-        fact = json.loads(requests.get('https://catfact.ninja/fact').text)['fact']
+        fact = fetches.Request().cat_fact()
         await ctx.reply(fact)
 
     # time
     @commands.hybrid_command(name='time', aliases=['now'], description='return current time')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def time(self, ctx: commands.Context, offset: int=0):
         shifted_time = ctx.message.created_at + timedelta(hours=offset)
         offset_str = f'{offset:+03}:00'
@@ -70,15 +80,13 @@ class Util(commands.Cog):
 
     # echo
     @commands.hybrid_command(name='echo', description='return input')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def echo(self, ctx: commands.Context, *, input: str):
         await ctx.send(input)
 
     # user
     @commands.hybrid_command(name='user', aliases=['u','who'], description='return user info')
-    @locks.sync_lock()
-    @locks.guild_lock()
+    @decorators.sync()
     async def user(self, ctx: commands.Context, user: discord.Member=None):
         user = user or ctx.message.author
         if len(user.roles) > 1:
