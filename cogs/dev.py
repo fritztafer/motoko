@@ -63,8 +63,8 @@ class Dev(commands.Cog):
         servers = ''
         for id in globals.gids:
             count += 1
-            servers += '\n{' + self.motoko.get_guild(int(id)).name + ': ' + str(id) + '},'
-        await ctx.reply(f'Currently a member of **{count} servers**:```{servers[:-1]}```')
+            servers += '\n' + self.motoko.get_guild(int(id)).name + ': ' + str(id)
+        await ctx.reply(f'Currently a member of **{count} servers**:```{servers}```')
 
     # shutdown
     @commands.hybrid_command(name='shutdown', description='terminate bot processes')
