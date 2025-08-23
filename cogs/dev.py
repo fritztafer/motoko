@@ -1,7 +1,6 @@
 # cogs/dev.py
 import discord
 from discord.ext import commands
-from typing import Literal
 import locks, globals
 
 class Dev(commands.Cog):
@@ -16,7 +15,7 @@ class Dev(commands.Cog):
     async def evaluate(self, ctx: commands.Context, *, object: str):
         await ctx.reply(f'```{eval(object)}```')
 
-    # synctree
+    # sync
     @commands.hybrid_command(name='sync', description='sync command tree')
     @locks.dev_user_lock()
     @locks.dev_guild_lock()
@@ -40,15 +39,44 @@ class Dev(commands.Cog):
         else:
             await ctx.reply(f'**{server}** is an invalid input')
 
+    # load
+    @commands.hybrid_command(name='load', description='load extension')
+    @locks.dev_user_lock()
+    @locks.dev_guild_lock()
+    @locks.dev_sync_lock()
+    async def load(self, ctx: commands.Context, cog: str):
+        await ctx.defer()
+        try:
+            await self.motoko.load_extension(f'cogs.{cog}')
+            await ctx.reply(f'**{cog}.py** load **success**')
+        except: 
+            await ctx.reply(f'**{cog}.py** load **failure**')
+
+    # unload
+    @commands.hybrid_command(name='unload', description='unload extension')
+    @locks.dev_user_lock()
+    @locks.dev_guild_lock()
+    @locks.dev_sync_lock()
+    async def unload(self, ctx: commands.Context, cog: str):
+        await ctx.defer()
+        if cog in ['dev', 'event']:
+            await ctx.reply(f'**{cog}.py** cannot be unloaded')
+            return
+        try:
+            await self.motoko.unload_extension(f'cogs.{cog}')
+            await ctx.reply(f'**{cog}.py** unload **success**')
+        except: 
+            await ctx.reply(f'**{cog}.py** unload **failure**')
+
     # reload
     @commands.hybrid_command(name='reload', description='reload extension')
     @locks.dev_user_lock()
     @locks.dev_guild_lock()
     @locks.dev_sync_lock()
-    async def reload(self, ctx: commands.Context, cog: Literal['dev','event','mod','util']):
+    async def reload(self, ctx: commands.Context, cog: str):
         await ctx.defer()
         try:
-            await self.motoko.reload_extension('cogs.'+cog)
+            await self.motoko.reload_extension(f'cogs.{cog}')
             await ctx.reply(f'**{cog}.py** reload **success**')
         except: 
             await ctx.reply(f'**{cog}.py** reload **failure**')
