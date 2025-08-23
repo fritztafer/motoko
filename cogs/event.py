@@ -21,17 +21,18 @@ class Event(commands.Cog):
     # error handler
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-        original = getattr(error, "original", error)
+        original = getattr(error, 'original', error)
         if isinstance(original, commands.MissingPermissions):
-            await ctx.reply("denied")
+            await ctx.reply('denied')
         elif isinstance(original, commands.BadArgument):
-            await ctx.reply("invalid")
+            await ctx.reply('invalid')
         elif isinstance(original, discord.Forbidden):
-            await ctx.reply("forbidden")
+            await ctx.reply('forbidden')
         elif isinstance(original, discord.NotFound):
-            await ctx.reply("not found")
+            await ctx.reply('not found')
         else:
-            # await ctx.reply(f"unexpected: `{type(original).__name__}`")
+            # await ctx.reply(f'unexpected: `{type(original).__name__}`')
+            await ctx.reply('unexpected')
             raise error
 
 async def setup(motoko: commands.Bot):
