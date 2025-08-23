@@ -2,16 +2,15 @@
 import discord
 from discord.ext import commands
 from datetime import timedelta
-import json
-import requests
 import locks
+import json, requests
 
 class Util(commands.Cog):
     def __init__(self, motoko: commands.Bot):
         self.motoko = motoko
 
     # help
-    @commands.hybrid_command(name='help', aliases=['motoko'], description='return available commands')
+    @commands.hybrid_command(name='help', aliases=['motoko','commands'], description='return available commands')
     @locks.sync_lock()
     @locks.guild_lock()
     async def help(self, ctx: commands.Context):
@@ -22,7 +21,7 @@ class Util(commands.Cog):
             '    @motoko (mention)',
             '\n'
         ]
-        for command in self.motoko.walk_commands():
+        for command in self.motoko.tree.get_commands(guild=ctx.guild):
             help.append(f'{command.name} - {command.description}')
         help = '\n'.join(help)
         await ctx.reply(f'```{help}```')
@@ -33,7 +32,7 @@ class Util(commands.Cog):
     @locks.guild_lock()
     async def about(self, ctx: commands.Context):
         about = 'I am a Discord bot inspired by Major Motoko Kusanagi from the 1995 animated film Ghost in the Shell. I was developed by <@234456546715762688> using the discord.py wrapper.'
-        await ctx.reply(f'{about}')
+        await ctx.reply(about)
 
     # hello
     @commands.hybrid_command(name='hello', aliases=['hi','yo','hey','sup'], description='return a greeting')
