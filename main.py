@@ -2,13 +2,16 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-import logging, logging.handlers
+from typing import Any
+import logging
+import logging.handlers
 import asyncio
 import os
-import fetches, globals
+import fetches
+import globals
 
 class Motoko(commands.Bot):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
     async def setup_hook(self):
@@ -20,50 +23,49 @@ class Motoko(commands.Bot):
 
         interaction_check = self.tree.interaction_check
         async def on_interaction(ctx: discord.Interaction):
-            if ctx.guild_id in fetches.Config().blacklist_guilds(): return await self.get_guild(ctx.guild_id).leave()
-            if ctx.user.id in fetches.Config().blacklist_users(): return
-            return await interaction_check(ctx)
+            guild = self.get_guild(ctx.guild.id) if ctx.guild is not None else None
+            if guild and guild.id in fetches.Config().blacklist_guilds():
+                await guild.leave()
+                return False
+            if ctx.user.id in fetches.Config().blacklist_users(): 
+                return False
+            return await interaction_check(ctx) # type: ignore
         self.tree.interaction_check = on_interaction
 
     async def on_message(self, ctx: discord.Message):
-        if ctx.guild.id in fetches.Config().blacklist_guilds(): return await self.get_guild(ctx.guild.id).leave()
-        if ctx.author.id in fetches.Config().blacklist_users(): return
-        if isinstance(ctx.channel, discord.DMChannel): return
-        if ctx.author.bot: return
+        guild = self.get_guild(ctx.guild.id) if ctx.guild is not None else None
+        if guild and guild.id in fetches.Config().blacklist_guilds():
+            await guild.leave()
+            return
+        if ctx.author.id in fetches.Config().blacklist_users():
+            return
+        if isinstance(ctx.channel, discord.DMChannel):
+            return
+        if ctx.author.bot:
+            return
         await self.process_commands(ctx)
     
-    async def on_command_error(self, ctx, error):
-        if hasattr(ctx, 'interaction') and ctx.interaction: # slash command
-            original = getattr(error, 'original', error)
-            if isinstance(error, commands.HybridCommandError): # hybrid command errors - unwrap twice
-                original = getattr(error.original, 'original', error.original)
-            if isinstance(original, (commands.MissingPermissions, app_commands.MissingPermissions)):
-                await ctx.reply('denied')
-            elif isinstance(original, (commands.BadArgument, app_commands.TransformerError)):
-                await ctx.reply('invalid')
-            elif isinstance(original, discord.Forbidden):
-                await ctx.reply('forbidden')
-            elif isinstance(original, discord.NotFound):
-                await ctx.reply('not found')
-            else:
-                raise error
-        else: # text command
-            original = getattr(error, 'original', error)
-            if isinstance(original, commands.MissingPermissions):
-                await ctx.reply('denied')
-            elif isinstance(original, commands.BadArgument):
-                await ctx.reply('invalid')
-            elif isinstance(original, discord.Forbidden):
-                await ctx.reply('forbidden')
-            elif isinstance(original, discord.NotFound):
-                await ctx.reply('not found')
-            else:
-                raise error
+    async def on_command_error(self, ctx: commands.Context[Any], error: Exception):
+        original = getattr(error, "original", error)
+        if isinstance(error, commands.HybridCommandError):
+            original = getattr(error.original, "original", error.original)
+        error_map: dict[type[BaseException], str] = {
+            commands.MissingPermissions: "denied",
+            commands.BadArgument: "invalid",
+            app_commands.MissingPermissions: "denied",
+            app_commands.TransformerError: "invalid",
+            discord.Forbidden: "forbidden",
+            discord.NotFound: "not found",
+        }
+        for err_type, message in error_map.items():
+            if isinstance(original, err_type):
+                await ctx.reply(message)
+                return
+        raise error
 
 async def main():
     logger = logging.getLogger('discord')
     logger.setLevel(logging.INFO)
-
     handler = logging.handlers.RotatingFileHandler(
         filename='motoko.log',
         encoding='utf-8',
@@ -76,7 +78,6 @@ async def main():
     logger.addHandler(handler)
 
     TOKEN = fetches.Config().token()
-
     async with Motoko(
         command_prefix=commands.when_mentioned_or('.'),
         intents=discord.Intents.all(), 

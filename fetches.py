@@ -40,7 +40,7 @@ class Config:
             json.dump(self.config, file, indent=4)
 
 class Request:
-    def __init__(self, url: str=None):
+    def __init__(self, url: str | None):
         self.url = url
     
     def cat_fact(self):

@@ -1,8 +1,11 @@
 from discord.ext import commands
+from typing import TypeVar, Generic
 import tests
 
-class Test(commands.Cog):
-    def __init__(self, motoko: commands.Bot):
+Motoko = TypeVar("Motoko", bound=commands.Bot)
+
+class Test(commands.Cog, Generic[Motoko]):
+    def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
     def get_testVar(self):

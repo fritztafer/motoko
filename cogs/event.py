@@ -1,7 +1,8 @@
 # cogs/event.py
 import discord
 from discord.ext import commands
-import fetches, globals
+import fetches
+import globals
 
 class Event(commands.Cog):
     def __init__(self, motoko: commands.Bot):
