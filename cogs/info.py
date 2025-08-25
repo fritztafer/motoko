@@ -1,15 +1,13 @@
-# cogs/util.py
+# cogs/info.py
 import discord
 from discord.ext import commands
-from typing import TypeVar, Generic
+from motoko import Motoko
+from util.fetches import request
 from datetime import timedelta
 import random
-import decorators
-import fetches
+import util.decorators as decorators
 
-Motoko = TypeVar("Motoko", bound=commands.Bot)
-
-class Util(commands.Cog, Generic[Motoko]):
+class Info(commands.Cog):
     def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
@@ -45,7 +43,7 @@ class Util(commands.Cog, Generic[Motoko]):
     # hello
     @commands.hybrid_command(name='hello', aliases=['hi','yo','hey','sup'], description='return a greeting')
     @decorators.sync()
-    async def hello(self, ctx: commands.Context[Motoko], *, user: discord.Member | None):
+    async def hello(self, ctx: commands.Context[Motoko], user: discord.Member | None):
         recipient = user or ctx.author
         greets = [
             'Reporting in',
@@ -67,17 +65,38 @@ class Util(commands.Cog, Generic[Motoko]):
         latency = round(self.motoko.latency * 1000)
         await ctx.reply(f'I read you with **{latency} ms** of latency')
     
-    # cat
-    @commands.hybrid_command(name='cat', description='return cat fact')
+    # cat-fact
+    @commands.hybrid_command(name='cat-fact', description='return cat fact')
     @decorators.sync()
-    async def cat(self, ctx: commands.Context[Motoko]):
-        fact = fetches.Request(None).cat_fact()
+    async def cat_fact(self, ctx: commands.Context[Motoko]):
+        fact = request.cat_fact()
         await ctx.reply(fact)
+
+    # cat-pic
+    @commands.hybrid_command(name='cat-pic', description='return cat picture')
+    @decorators.sync()
+    async def cat_pic(self, ctx: commands.Context[Motoko]):
+        fact = request.cat_pic()
+        await ctx.reply(fact)
+
+    # define
+    @commands.hybrid_command(name='define', description='define given word')
+    @decorators.sync()
+    async def define(self, ctx: commands.Context[Motoko], word: str):
+        definition = request.define(word)
+        await ctx.reply(definition)
+
+    # quote
+    @commands.hybrid_command(name='quote', description='return a quote')
+    @decorators.sync()
+    async def quote(self, ctx: commands.Context[Motoko]):
+        quote = request.quote()
+        await ctx.reply(quote)
 
     # time
     @commands.hybrid_command(name='time', aliases=['now'], description='return current time')
     @decorators.sync()
-    async def time(self, ctx: commands.Context[Motoko], *, offset: int=0):
+    async def time(self, ctx: commands.Context[Motoko], offset: int=0):
         shifted_time = ctx.message.created_at + timedelta(hours=offset)
         offset_str = f'{offset:+03}:00'
         formatted_time = shifted_time.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ')
@@ -86,34 +105,32 @@ class Util(commands.Cog, Generic[Motoko]):
     # echo
     @commands.hybrid_command(name='echo', description='return input')
     @decorators.sync()
-    async def echo(self, ctx: commands.Context[Motoko], /, input: str):
+    async def echo(self, ctx: commands.Context[Motoko], *, input: str):
         await ctx.send(input)
 
     # user
     @commands.hybrid_command(name='user', aliases=['u','who'], description='return user info')
     @decorators.sync()
-    async def user(self, ctx: commands.Context[Motoko], *, user: discord.Member | None):
+    async def user(self, ctx: commands.Context[Motoko], user: discord.Member | None):
         target = user or ctx.message.author
         if isinstance(target, discord.Member) and len(target.roles) > 1:
             roles = ' '.join([role.mention for role in target.roles if role.name != '@everyone'])
         else:
             roles = 'user has no role'
         status = target.status if isinstance(target, discord.Member) else "Unknown"
+        created_str = target.created_at.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ')
         joined = getattr(target, 'joined_at', None)
-        if joined:
-            joined_str = joined.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ')
-        else:
-            joined_str = 'N/A'
+        joined_str = joined.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ') if joined else None
         embed = discord.Embed(title='USER INFORMATION', color=discord.Colour.from_str('#44578e'), timestamp=ctx.message.created_at)
         embed.set_thumbnail(url=target.avatar)
         embed.add_field(name='DISPLAY NAME', inline=False, value=target.mention)
         embed.add_field(name='USERNAME',     inline=False, value=f'`{target.name}`')
         embed.add_field(name='ID',           inline=False, value=target.id)
         embed.add_field(name='STATUS',       inline=False, value=status)
-        embed.add_field(name='CREATED',      inline=False, value=target.created_at.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' '))
+        embed.add_field(name='CREATED',      inline=False, value=created_str)
         embed.add_field(name='JOINED',       inline=False, value=joined_str)
         embed.add_field(name='ROLES',        inline=False, value=roles)
         await ctx.reply(embed=embed)
 
-async def setup(motoko: commands.Bot):
-    await motoko.add_cog(Util(motoko))
+async def setup(motoko: Motoko):
+    await motoko.add_cog(Info(motoko))

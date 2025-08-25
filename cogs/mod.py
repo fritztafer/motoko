@@ -1,13 +1,11 @@
 # cogs/mod.py
 import discord
 from discord.ext import commands
-from typing import TypeVar, Generic
-import decorators
+from motoko import Motoko
+import util.decorators as decorators
 from datetime import timedelta
 
-Motoko = TypeVar("Motoko", bound=commands.Bot)
-
-class Mod(commands.Cog, Generic[Motoko]):
+class Mod(commands.Cog):
     def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
@@ -62,5 +60,5 @@ class Mod(commands.Cog, Generic[Motoko]):
         await user.timeout(None, reason=reason)
         await ctx.reply(f'{user.mention} was **unmuted**')
 
-async def setup(motoko: commands.Bot):
+async def setup(motoko: Motoko):
     await motoko.add_cog(Mod(motoko))

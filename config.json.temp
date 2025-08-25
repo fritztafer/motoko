@@ -9,11 +9,7 @@
         ]
     },
     "BLACKLIST": {
-        "USERS": [
-            
-        ],
-        "GUILDS": [
-            
-        ]
+        "USERS": [],
+        "GUILDS": []
     }
 }

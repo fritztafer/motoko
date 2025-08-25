@@ -1,16 +1,15 @@
 # cogs/dev.py
 import discord
 from discord.ext import commands
-from typing import Literal, Generic, TypeVar, cast
-from importlib import reload
+from motoko import Motoko
+import util.decorators as decorators
+from util.fetches import config
+from states import state
+from typing import Literal, cast
+from importlib import reload, import_module
 import sys
-import decorators
-import fetches
-import globals
 
-Motoko = TypeVar("Motoko", bound=commands.Bot)
-
-class Dev(commands.Cog, Generic[Motoko]):
+class Dev(commands.Cog):
     def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
@@ -27,21 +26,22 @@ class Dev(commands.Cog, Generic[Motoko]):
     @decorators.dev_sync()
     async def synctree(self, ctx: commands.Context[Motoko], server: str | None):
         await ctx.defer()
+        guild_ids: list[int] = [guild.id for guild in self.motoko.guilds]
         if type(server) is type(None):
-            if ctx.guild is not None:
+            if ctx.guild:
                 synced = await self.motoko.tree.sync(guild=discord.Object(id=ctx.guild.id))
                 await ctx.reply(f'**{len(synced)} commands** synchronized to **{ctx.guild}**')
             return
         if str(server) == 'all':
-            for guild in globals.gids:
-                if globals.gids.index(guild) < len(globals.gids)-1:
+            for guild in guild_ids:
+                if guild_ids.index(guild) < len(guild_ids)-1:
                     await self.motoko.tree.sync(guild=discord.Object(id=guild))
                 else:
                     await self.motoko.tree.sync(guild=discord.Object(id=guild))
-                    await ctx.reply(f'Command tree synchronized to **{len(globals.gids)} servers**')
-        elif server is not None and server.isdigit() and int(server) in globals.gids:
+                    await ctx.reply(f'Command tree synchronized to **{len(guild_ids)} servers**')
+        elif server and server.isdigit() and int(server) in guild_ids:
             guild = self.motoko.get_guild(int(server))
-            if guild is not None:
+            if guild:
                 synced = await self.motoko.tree.sync(guild=discord.Object(id=guild.id))
                 await ctx.reply(f'**{len(synced)} commands** synchronized to **{guild.name}**')
         else:
@@ -91,8 +91,14 @@ class Dev(commands.Cog, Generic[Motoko]):
     @decorators.dev_lock()
     @decorators.dev_sync()
     async def module(self, ctx: commands.Context[Motoko], *, name: str):
+        await ctx.defer()
+        if name == 'states':
+            await ctx.reply(f'**{name}.py** cannot be reloaded')
+            return
         try:
-            if name in sys.modules:
+            if name not in sys.modules:
+                module = import_module(name)
+            else:
                 module = sys.modules[name]
                 reload(module)
             await ctx.reply(f'**{name}.py** reload **success**')
@@ -107,7 +113,7 @@ class Dev(commands.Cog, Generic[Motoko]):
         try:
             object_literal = cast(Literal['DEVELOPER', 'BLACKLIST'], object.upper())
             list_literal = cast(Literal['USERS', 'GUILDS'], list.upper())
-            result = fetches.Config().read(object_literal, list_literal)
+            result = config.read(object_literal, list_literal)
             await ctx.reply(f'{object} {list}: {result}')
         except Exception as error:
             await ctx.reply(f'could not fetch {object} {list}: {error}')
@@ -122,11 +128,33 @@ class Dev(commands.Cog, Generic[Motoko]):
             object_literal = cast(Literal['DEVELOPER', 'BLACKLIST'], object.upper())
             list_literal = cast(Literal['USERS', 'GUILDS'], list.upper())
             result = 'added to' if action == 'add' else 'deleted from'
-            fetches.Config().write(action, object_literal, list_literal, id_int)
-            if id_int in globals.gids:
-                guild = self.motoko.get_guild(id_int)
-                if guild:
-                    await guild.leave()
+            config.write(action, object_literal, list_literal, id_int)
+            if action == 'add':
+                if object == 'developer':
+                    if list == 'users':
+                        state.add_dev_user(id_int)
+                    elif list == 'guilds':
+                        state.add_dev_guild(id_int)
+                elif object == 'blacklist':
+                    if list == 'users':
+                        state.add_ban_user(id_int)
+                    elif list == 'guilds':
+                        state.add_ban_guild(id_int)
+            elif action == 'del':
+                if object == 'developer':
+                    if list == 'users':
+                        state.del_dev_user(id_int)
+                    elif list == 'guilds':
+                        state.del_dev_guild(id_int)
+                elif object == 'blacklist':
+                    if list == 'users':
+                        state.del_ban_user(id_int)
+                    elif list == 'guilds':
+                        state.del_ban_guild(id_int)
+            if action == 'add' and object == 'blacklist' and list == 'guilds':
+                if id_int in [guild.id for guild in self.motoko.guilds]:
+                    guild = self.motoko.get_guild(id_int)
+                    await guild.leave() if guild else guild
             await ctx.reply(f'{id} {result} {object} {list}')
         except Exception as error:
             await ctx.reply(f'{id} could not be {object} {list}: {error}')
@@ -137,11 +165,9 @@ class Dev(commands.Cog, Generic[Motoko]):
     @decorators.dev_sync()
     async def joined(self, ctx: commands.Context[Motoko]):
         servers = ''
-        for id in globals.gids:
-            guild = self.motoko.get_guild(id)
-            if guild:
-                servers += '\n' + guild.name + ': ' + str(guild.id)
-        await ctx.reply(f'Member of **{len(globals.gids)} servers**:```{servers}```')
+        for guild in self.motoko.guilds:
+            servers += '\n' + guild.name + ': ' + str(guild.id)
+        await ctx.reply(f'Member of **{len(self.motoko.guilds)} servers**:```{servers}```')
 
     # leave
     @commands.hybrid_command(name='leave', description='leave given server')
@@ -151,7 +177,7 @@ class Dev(commands.Cog, Generic[Motoko]):
         guild = self.motoko.get_guild(int(id))
         if guild:
             await guild.leave()
-            await ctx.reply(f'Left `{guild.name}`')
+            await ctx.reply(f'`{guild.name}` left successfully')
         else:
             await ctx.reply(f'{id} is invalid')
 
@@ -161,7 +187,15 @@ class Dev(commands.Cog, Generic[Motoko]):
     @decorators.dev_sync()
     async def shutdown(self, ctx: commands.Context[Motoko]):
         await ctx.reply('Affirmative, **shutdown** initiated')
-        await self.motoko.close()
+        await self.motoko.shutdown()
 
-async def setup(motoko: commands.Bot):
+    # restart
+    @commands.hybrid_command(name='restart', description='restart bot processes')
+    @decorators.dev_lock()
+    @decorators.dev_sync()
+    async def restart(self, ctx: commands.Context[Motoko]):
+        await ctx.reply('Affirmative, **restart** initiated')
+        await self.motoko.restart()
+
+async def setup(motoko: Motoko):
     await motoko.add_cog(Dev(motoko))

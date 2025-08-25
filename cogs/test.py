@@ -1,15 +1,20 @@
+#cogs/test.py
 from discord.ext import commands
-from typing import TypeVar, Generic
-import tests
+from motoko import Motoko
+import util.tests as tests
+import util.decorators as decorators
 
-Motoko = TypeVar("Motoko", bound=commands.Bot)
-
-class Test(commands.Cog, Generic[Motoko]):
+class Test(commands.Cog):
     def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
-    def get_testVar(self):
+    @commands.hybrid_command(name='test', description='test command')
+    @decorators.dev_lock()
+    async def test(self, ctx: commands.Context[Motoko]):
+        await ctx.reply("test " + str(123) + Test.get_testVar(self))
+
+    def get_testVar(self) -> str:
         return tests.testVar
 
-async def setup(motoko: commands.Bot):
+async def setup(motoko: Motoko):
     await motoko.add_cog(Test(motoko))

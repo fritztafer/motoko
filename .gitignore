@@ -1,3 +1,4 @@
 *.json
+*.jsonl
 *.log
 __pycache__
