@@ -105,8 +105,8 @@ class Dev(commands.Cog):
         except Exception as error:
             await ctx.reply(f'**{name}.py** reload **failure**: {error}')
 
-    # conf_read
-    @commands.hybrid_command(name='conf_read', description='read from configuration file')
+    # confr
+    @commands.hybrid_command(name='confr', description='read from configuration file')
     @decorators.dev_lock()
     @decorators.dev_sync()
     async def conf_read(self, ctx: commands.Context[Motoko], object: Literal['developer','blacklist'], list: Literal['users','guilds']):
@@ -118,8 +118,8 @@ class Dev(commands.Cog):
         except Exception as error:
             await ctx.reply(f'could not fetch {object} {list}: {error}')
 
-    # conf_write
-    @commands.hybrid_command(name='conf_write', description='write to configuration file')
+    # confw
+    @commands.hybrid_command(name='confw', description='write to configuration file')
     @decorators.dev_lock()
     @decorators.dev_sync()
     async def conf_write(self, ctx: commands.Context[Motoko], action: Literal['add','del'], object: Literal['developer','blacklist'], list: Literal['users','guilds'], id: str):

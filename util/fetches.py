@@ -51,11 +51,14 @@ class Request:
 
     def define(self, word: str) -> str:
         response = requests.get(f'https://api.dictionaryapi.dev/api/v2/entries/en/{word}').json()[0]
-        return response['meanings'][0]['definitions'][0]['definition']
+        definitions = response['word']
+        for meaning in response['meanings']:
+            definitions += '\n' + meaning['partOfSpeech'] + ': ' + meaning['definitions'][0]['definition']
+        return definitions
     
     def quote(self) -> str:
         response = requests.get('https://zenquotes.io/api/random').json()[0]
-        return f'"{response['q']}"\n**{response['a']}**'
+        return '"' + response['q'] + '"\n**' + response['a'] + '**'
 
 config = Config()
 request = Request(url="")

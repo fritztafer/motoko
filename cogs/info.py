@@ -2,7 +2,6 @@
 import discord
 from discord.ext import commands
 from motoko import Motoko
-from util.fetches import request
 from datetime import timedelta
 import random
 import util.decorators as decorators
@@ -64,34 +63,6 @@ class Info(commands.Cog):
     async def ping(self, ctx: commands.Context[Motoko]):
         latency = round(self.motoko.latency * 1000)
         await ctx.reply(f'I read you with **{latency} ms** of latency')
-    
-    # cat-fact
-    @commands.hybrid_command(name='cat-fact', description='return cat fact')
-    @decorators.sync()
-    async def cat_fact(self, ctx: commands.Context[Motoko]):
-        fact = request.cat_fact()
-        await ctx.reply(fact)
-
-    # cat-pic
-    @commands.hybrid_command(name='cat-pic', description='return cat picture')
-    @decorators.sync()
-    async def cat_pic(self, ctx: commands.Context[Motoko]):
-        fact = request.cat_pic()
-        await ctx.reply(fact)
-
-    # define
-    @commands.hybrid_command(name='define', description='define given word')
-    @decorators.sync()
-    async def define(self, ctx: commands.Context[Motoko], word: str):
-        definition = request.define(word)
-        await ctx.reply(definition)
-
-    # quote
-    @commands.hybrid_command(name='quote', description='return a quote')
-    @decorators.sync()
-    async def quote(self, ctx: commands.Context[Motoko]):
-        quote = request.quote()
-        await ctx.reply(quote)
 
     # time
     @commands.hybrid_command(name='time', aliases=['now'], description='return current time')
