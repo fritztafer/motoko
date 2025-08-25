@@ -61,7 +61,7 @@ class Request:
         try:
             response = requests.get(f'https://api.dictionaryapi.dev/api/v2/entries/en/{word}').json()[0]
         except Exception:
-            return word + 'not found'
+            return word + ' not found'
         definitions = response['word']
         for meaning in response['meanings']:
             definitions += '\n' + meaning['partOfSpeech'] + ': ' + meaning['definitions'][0]['definition']
