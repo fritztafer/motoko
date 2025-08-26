@@ -1,4 +1,3 @@
-#cogs/test.py
 from discord.ext import commands
 from motoko import Motoko
 import util.tests as tests

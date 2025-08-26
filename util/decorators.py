@@ -1,4 +1,3 @@
-# decorators.py
 from discord.ext import commands
 from discord import app_commands
 from motoko import Motoko

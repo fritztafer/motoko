@@ -1,8 +1,7 @@
-# cogs/req.py
 from discord.ext import commands
 from motoko import Motoko
-from util.fetches import request
 import util.decorators as decorators
+from util.fetches import request
 
 class Req(commands.Cog):
     def __init__(self, motoko: Motoko):

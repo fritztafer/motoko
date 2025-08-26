@@ -1,4 +1,3 @@
-# cogs/info.py
 import discord
 from discord.ext import commands
 from motoko import Motoko

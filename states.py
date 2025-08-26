@@ -1,4 +1,3 @@
-# states.py
 class State:
     def __init__(self):
         self.all_guilds: list[int] = []
