@@ -12,7 +12,7 @@ def motoko_log():
     motoko_logger.setLevel(logging.DEBUG)
 
     handler = logging.handlers.RotatingFileHandler(
-        filename='motoko.log',
+        filename='logs/motoko.log',
         encoding='utf-8',
         maxBytes=1*1024*1024,
         backupCount=1,
@@ -54,7 +54,7 @@ def command_log():
     logger.setLevel(logging.INFO)
 
     handler = logging.handlers.RotatingFileHandler(
-        filename="command.jsonl",
+        filename="logs/command.jsonl",
         encoding="utf-8",
         maxBytes=1*1024*1024,
         backupCount=1

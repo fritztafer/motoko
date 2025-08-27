@@ -11,7 +11,7 @@ class Event(commands.Cog):
     # join server
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        logger.info('join server ' + guild.name)
+        logger.info('join ' + guild.name)
         if guild.id in state.ban_guilds:
             await guild.leave()
             return
@@ -21,7 +21,7 @@ class Event(commands.Cog):
     # leave server
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
-        logger.info('left server ' + guild.name)
+        logger.info('left ' + guild.name)
         state.del_all_guild(guild.id)
 
 async def setup(motoko: Motoko):
