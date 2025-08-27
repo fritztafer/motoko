@@ -10,6 +10,12 @@ class Config:
     def token(self) -> str:
         return self.config['TOKEN']
 
+    def prefix(self) -> str:
+        return self.config['PREFIX']
+
+    def testing(self) -> int:
+        return self.config['TESTING']
+
     def dev_users(self) -> list[int]:
         return self.config['DEVELOPER']['USERS']
 
@@ -42,5 +48,4 @@ class Config:
 config = Config()
 
 def request(url: str) -> requests.Response:
-    response = requests.get(url)
-    return response
+    return requests.get(url)

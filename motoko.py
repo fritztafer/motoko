@@ -14,6 +14,7 @@ class Motoko(commands.Bot):
         super().__init__(*args, **kwargs)
 
     async def setup_hook(self):
+        state.testing = config.testing()
         state.all_guilds = [guild.id async for guild in self.fetch_guilds(limit=None, with_counts=False)]
         state.ban_guilds = config.ban_guilds()
         state.ban_users = config.ban_users()
@@ -84,10 +85,11 @@ async def motoko():
     logger.info('startup initiated')
 
     TOKEN = config.token()
+    PREFIX = config.prefix()
 
     async with Motoko(
-        command_prefix=commands.when_mentioned_or('.'),
-        intents=discord.Intents.all(), 
+        command_prefix=commands.when_mentioned_or(PREFIX),
+        intents=discord.Intents.all(),
         help_command=None,
     ) as motoko:
         await motoko.start(TOKEN)

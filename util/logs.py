@@ -39,8 +39,8 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         log_record: dict[str, Any] = {
-            "id": int(record.getMessage()),
-            "time": self.formatTime(record, self.datefmt)
+            "time": self.formatTime(record, self.datefmt),
+            "id": int(record.getMessage())
         }
 
         for key, value in record.__dict__.items():
@@ -70,7 +70,7 @@ def command_log():
 def log_command(ctx: commands.Context[Any]):
     if ctx.interaction is None:
         id = ctx.message.id
-        prefix = '@motoko' if ctx.prefix and ctx.prefix.startswith('<@') else ctx.prefix
+        prefix = '@' if ctx.prefix and ctx.prefix.startswith('<@') else ctx.prefix
         args = ctx.message.content[len(f'{ctx.prefix}{ctx.invoked_with} '):] or None
     else: # Interaction
         id = ctx.interaction.id

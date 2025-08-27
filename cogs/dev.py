@@ -15,14 +15,14 @@ class Dev(commands.Cog):
     # evaluate
     @commands.hybrid_command(name='eval', description='evaluate input')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def evaluate(self, ctx: commands.Context[Motoko], *, object: str):
         await ctx.reply(f'```{eval(object)}```')
 
     # sync
     @commands.hybrid_command(name='sync', description='sync command tree')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def synctree(self, ctx: commands.Context[Motoko], server: str | None):
         await ctx.defer()
         guild_ids: list[int] = [guild.id for guild in self.motoko.guilds]
@@ -49,7 +49,7 @@ class Dev(commands.Cog):
     # load
     @commands.hybrid_command(name='load', description='load extension')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def load(self, ctx: commands.Context[Motoko], *, cog: str):
         await ctx.defer()
         try:
@@ -61,7 +61,7 @@ class Dev(commands.Cog):
     # unload
     @commands.hybrid_command(name='unload', description='unload extension')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def unload(self, ctx: commands.Context[Motoko], *, cog: str):
         await ctx.defer()
         if cog in ['dev', 'event']:
@@ -76,7 +76,7 @@ class Dev(commands.Cog):
     # reload
     @commands.hybrid_command(name='reload', description='reload extension')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def reload(self, ctx: commands.Context[Motoko], *, cog: str):
         await ctx.defer()
         try:
@@ -88,7 +88,7 @@ class Dev(commands.Cog):
     # module
     @commands.hybrid_command(name='module', description='reload module')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def module(self, ctx: commands.Context[Motoko], *, name: str):
         await ctx.defer()
         if name == 'states':
@@ -107,7 +107,7 @@ class Dev(commands.Cog):
     # confr
     @commands.hybrid_command(name='confr', description='read from configuration file')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def conf_read(self, ctx: commands.Context[Motoko], object: Literal['developer','blacklist'], list: Literal['users','guilds']):
         try:
             object_literal = cast(Literal['DEVELOPER', 'BLACKLIST'], object.upper())
@@ -120,7 +120,7 @@ class Dev(commands.Cog):
     # confw
     @commands.hybrid_command(name='confw', description='write to configuration file')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def conf_write(self, ctx: commands.Context[Motoko], action: Literal['add','del'], object: Literal['developer','blacklist'], list: Literal['users','guilds'], id: str):
         try:
             id_int: int = int(id)
@@ -161,7 +161,7 @@ class Dev(commands.Cog):
     # joined
     @commands.hybrid_command(name='joined', description='return information about joined servers')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def joined(self, ctx: commands.Context[Motoko]):
         servers = ''
         for guild in self.motoko.guilds:
@@ -171,7 +171,7 @@ class Dev(commands.Cog):
     # leave
     @commands.hybrid_command(name='leave', description='leave given server')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def leave(self, ctx: commands.Context[Motoko], *, id: str):
         guild = self.motoko.get_guild(int(id))
         if guild:
@@ -183,7 +183,7 @@ class Dev(commands.Cog):
     # shutdown
     @commands.hybrid_command(name='shutdown', description='terminate bot processes')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def shutdown(self, ctx: commands.Context[Motoko]):
         await ctx.reply('Affirmative, **shutdown** initiated')
         await self.motoko.shutdown()
@@ -191,7 +191,7 @@ class Dev(commands.Cog):
     # restart
     @commands.hybrid_command(name='restart', description='restart bot processes')
     @decorators.dev_lock()
-    @decorators.dev_sync()
+    @decorators.sync(dev=True)
     async def restart(self, ctx: commands.Context[Motoko]):
         await ctx.reply('Affirmative, **restart** initiated')
         await self.motoko.restart()

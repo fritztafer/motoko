@@ -1,5 +1,6 @@
 class State:
     def __init__(self):
+        self.testing: int
         self.all_guilds: list[int] = []
         self.ban_guilds: list[int] = []
         self.ban_users: list[int] = []

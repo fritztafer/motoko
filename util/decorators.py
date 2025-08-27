@@ -12,10 +12,10 @@ def dev_lock():
         return False
     return commands.check(predicate)
 
-# lock to dev guilds in tree.sync()
-def dev_sync():
-    return app_commands.guilds(*state.dev_guilds)
-
-# lock to all guilds in tree.sync()
-def sync():
-    return app_commands.guilds(*state.all_guilds)
+# lock to given guilds in tree.sync()
+def sync(dev: bool=False):
+    if dev or state.testing:
+        guilds = state.dev_guilds
+    else:
+        guilds = state.all_guilds
+    return app_commands.guilds(*guilds)

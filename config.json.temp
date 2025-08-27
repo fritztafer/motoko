@@ -1,5 +1,7 @@
 {
     "TOKEN": "",
+    "PREFIX": ".",
+    "TESTING": 0,
     "DEVELOPER": {
         "USERS": [
             

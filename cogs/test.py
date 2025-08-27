@@ -9,6 +9,7 @@ class Test(commands.Cog):
 
     @commands.hybrid_command(name='test', description='test command')
     @decorators.dev_lock()
+    @decorators.sync(dev=True)
     async def test(self, ctx: commands.Context[Motoko]):
         await ctx.reply("test " + str(123) + Test.get_testVar(self))
 
