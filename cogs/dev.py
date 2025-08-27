@@ -3,7 +3,7 @@ from discord.ext import commands
 from motoko import Motoko
 import util.decorators as decorators
 from util.fetches import config
-from states import state
+from state import state
 from typing import Literal, cast
 from importlib import reload, import_module
 import sys

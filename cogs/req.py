@@ -7,33 +7,43 @@ class Req(commands.Cog):
     def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
-    # catf
-    @commands.hybrid_command(name='catf', description='return cat fact')
-    @decorators.sync()
-    async def cat_fact(self, ctx: commands.Context[Motoko]):
-        fact = request.cat_fact()
-        await ctx.reply(fact)
-
     # catp
     @commands.hybrid_command(name='catp', description='return cat picture')
     @decorators.sync()
     async def cat_pic(self, ctx: commands.Context[Motoko]):
-        fact = request.cat_pic()
-        await ctx.reply(fact)
+        response = request('https://api.thecatapi.com/v1/images/search').json()[0]
+        if response.status_code == 200:
+            message = response['url']
+        else:
+            message = 'https://media.tenor.com/JjVEMUm8yigAAAAM/no-cat.gif'
+        await ctx.reply(message)
 
     # define
     @commands.hybrid_command(name='define', description='define given word')
     @decorators.sync()
     async def define(self, ctx: commands.Context[Motoko], word: str):
-        definition = request.define(word)
-        await ctx.reply(definition)
+        response = request(f'https://api.dictionaryapi.dev/api/v2/entries/en/{word}').json()[0]
+        if response.status_code == 200:
+            definitions = response['word']
+            for meaning in response['meanings']:
+                definitions += '\n' + meaning['partOfSpeech'] + ': ' + meaning['definitions'][0]['definition']
+            message = definitions
+        else:
+            message = word + ' not found'
+        await ctx.reply(message)
 
     # quote
     @commands.hybrid_command(name='quote', description='return a quote')
     @decorators.sync()
     async def quote(self, ctx: commands.Context[Motoko]):
-        quote = request.quote()
-        await ctx.reply(quote)
+        response = request('https://zenquotes.io/api/random').json()[0]
+        if response.status_code == 200:
+            quote = response['q']
+            author = response['a']
+            message = '"' + quote + '"\n**' + author + '**'
+        else:
+            message = '"The only quote currently available is this one."\n**Fritz**'
+        await ctx.reply(message)
 
 async def setup(motoko: Motoko):
     await motoko.add_cog(Req(motoko))

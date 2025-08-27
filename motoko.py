@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from states import state
+from state import state
 from util.fetches import config
 from util.logs import logger, motoko_log, log_command
 from typing import Any

@@ -1,7 +1,7 @@
 from discord.ext import commands
 from discord import app_commands
 from motoko import Motoko
-from states import state
+from state import state
 
 # lock to dev users & guilds
 def dev_lock():

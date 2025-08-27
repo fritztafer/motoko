@@ -39,40 +39,8 @@ class Config:
         with open('./config.json', 'w') as file:
             json.dump(self.config, file, indent=4)
 
-class Request:
-    def __init__(self, url: str):
-        self.url = url
-
-    def cat_fact(self) -> str:
-        try:
-            response = requests.get('https://catfact.ninja/fact').json()['fact']
-        except Exception:
-            return 'unavailable'
-        return response
-
-    def cat_pic(self) -> str:
-        try:
-            response = requests.get('https://api.thecatapi.com/v1/images/search').json()[0]['url']
-        except Exception:
-            return 'unavailable'
-        return response
-
-    def define(self, word: str) -> str:
-        try:
-            response = requests.get(f'https://api.dictionaryapi.dev/api/v2/entries/en/{word}').json()[0]
-        except Exception:
-            return word + ' not found'
-        definitions = response['word']
-        for meaning in response['meanings']:
-            definitions += '\n' + meaning['partOfSpeech'] + ': ' + meaning['definitions'][0]['definition']
-        return definitions
-    
-    def quote(self) -> str:
-        try:
-            response = requests.get('https://zenquotes.io/api/random').json()[0]
-        except Exception:
-            return 'unavailable'
-        return '"' + response['q'] + '"\n**' + response['a'] + '**'
-
 config = Config()
-request = Request(url="")
+
+def request(url: str) -> requests.Response:
+    response = requests.get(url)
+    return response

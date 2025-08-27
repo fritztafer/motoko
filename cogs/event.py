@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from motoko import Motoko
-from states import state
+from state import state
 from util.logs import logger
 
 class Event(commands.Cog):
