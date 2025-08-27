@@ -70,9 +70,9 @@ def command_log():
 def log_command(ctx: commands.Context[Any]):
     if ctx.interaction is None:
         id = ctx.message.id
-        prefix = '@motoko' if ctx.prefix and ctx.prefix[:2] == '<@' else ctx.prefix
-        args = ' '.join(str(arg) for arg in ctx.args[1:]) if len(ctx.args) > 1 else None
-    else:  # Interaction
+        prefix = '@motoko' if ctx.prefix and ctx.prefix.startswith('<@') else ctx.prefix
+        args = ctx.message.content[len(f'{ctx.prefix}{ctx.invoked_with} '):] or None
+    else: # Interaction
         id = ctx.interaction.id
         prefix = ctx.prefix
         options: list[dict[str, Any]] = ctx.interaction.data.get('options', [])  # type: ignore
@@ -83,7 +83,7 @@ def log_command(ctx: commands.Context[Any]):
         extra = {
             'prefix': prefix,
             'command': ctx.invoked_with,
-            'argument': args,
+            'argument': str(args),
             'parent': str(ctx.command.parent) if ctx.command and ctx.command.parent else None,
             'cog': ctx.cog.qualified_name if ctx.cog else None,
             'user_name': ctx.author.name,
