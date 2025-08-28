@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from motoko import Motoko
 from state import state
-from util.logs import logger
+from utils.logs import logger
 
 class Event(commands.Cog):
     def __init__(self, motoko: Motoko):

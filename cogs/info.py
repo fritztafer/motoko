@@ -1,10 +1,8 @@
-import discord
+from discord import Member, Embed, Colour
 from discord.ext import commands
 from motoko import Motoko
-import util.decorators as decorators
-from datetime import timedelta
+import utils.decorators as decorators
 import random
-import time
 
 class Info(commands.Cog):
     def __init__(self, motoko: Motoko):
@@ -41,7 +39,7 @@ class Info(commands.Cog):
     # hello
     @commands.hybrid_command(name='hello', aliases=['hi','yo','hey','sup'], description='return a greeting')
     @decorators.sync()
-    async def hello(self, ctx: commands.Context[Motoko], user: discord.Member | None):
+    async def hello(self, ctx: commands.Context[Motoko], user: Member | None):
         recipient = user or ctx.author
         greets = [
             'Reporting in',
@@ -63,44 +61,20 @@ class Info(commands.Cog):
         latency = round(self.motoko.latency * 1000)
         await ctx.reply(f'I read you with **{latency} ms** of latency')
 
-    # time
-    @commands.hybrid_command(name='time', aliases=['now'], description='return current time')
-    @decorators.sync()
-    async def time(self, ctx: commands.Context[Motoko], offset: int=0):
-        shifted_time = ctx.message.created_at + timedelta(hours=offset)
-        offset_str = f'{offset:+03}:00'
-        formatted_time = shifted_time.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ')
-        await ctx.reply(f'{formatted_time} {offset_str} (UTC{offset:+})')
-
-    # timer
-    @commands.hybrid_command(name='timer', aliases=['countdown'], description='return countdown timer for given minutes')
-    @decorators.sync()
-    async def timer(self, ctx: commands.Context[Motoko], minutes: int):
-        now = int(time.time())
-        future = now + (minutes * 60)
-        timer = f'<t:{future}:R>'
-        await ctx.reply(timer)
-
-    # echo
-    @commands.hybrid_command(name='echo', description='return input')
-    @decorators.sync()
-    async def echo(self, ctx: commands.Context[Motoko], *, input: str):
-        await ctx.send(input)
-
     # user
     @commands.hybrid_command(name='user', aliases=['u','who'], description='return user info')
     @decorators.sync()
-    async def user(self, ctx: commands.Context[Motoko], user: discord.Member | None):
+    async def user(self, ctx: commands.Context[Motoko], user: Member | None):
         target = user or ctx.message.author
-        if isinstance(target, discord.Member) and len(target.roles) > 1:
+        if isinstance(target, Member) and len(target.roles) > 1:
             roles = ' '.join([role.mention for role in target.roles if role.name != '@everyone'])
         else:
             roles = 'user has no role'
-        status = target.status if isinstance(target, discord.Member) else "Unknown"
+        status = target.status if isinstance(target, Member) else "Unknown"
         created_str = target.created_at.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ')
         joined = getattr(target, 'joined_at', None)
         joined_str = joined.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ') if joined else None
-        embed = discord.Embed(title='USER INFORMATION', color=discord.Colour.from_str('#44578e'), timestamp=ctx.message.created_at)
+        embed = Embed(title='USER INFORMATION', color=Colour.from_str('#44578e'), timestamp=ctx.message.created_at)
         embed.set_thumbnail(url=target.avatar)
         embed.add_field(name='DISPLAY NAME', inline=False, value=target.mention)
         embed.add_field(name='USERNAME',     inline=False, value=f'`{target.name}`')

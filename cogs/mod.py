@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from motoko import Motoko
-import util.decorators as decorators
+import utils.decorators as decorators
 from datetime import timedelta
 
 class Mod(commands.Cog):

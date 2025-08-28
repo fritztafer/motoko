@@ -1,7 +1,7 @@
 from discord.ext import commands
 from motoko import Motoko
-import util.tests as tests
-import util.decorators as decorators
+import utils.tests as tests
+import utils.decorators as decorators
 
 class Test(commands.Cog):
     def __init__(self, motoko: Motoko):

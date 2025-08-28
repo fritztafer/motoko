@@ -1,7 +1,7 @@
-import discord
+from discord import Object
 from discord.ext import commands
 from motoko import Motoko
-import util.decorators as decorators
+import utils.decorators as decorators
 from state import state
 from typing import Literal, List, cast
 from importlib import reload, import_module
@@ -33,20 +33,20 @@ class Dev(commands.Cog):
         guild_ids: list[int] = [guild.id for guild in self.motoko.guilds]
         if type(server) is type(None):
             if ctx.guild:
-                synced = await self.motoko.tree.sync(guild=discord.Object(id=ctx.guild.id))
+                synced = await self.motoko.tree.sync(guild=Object(id=ctx.guild.id))
                 await ctx.reply(f'**{len(synced)} commands** synchronized to **{ctx.guild}**')
             return
         if str(server) == 'all':
             for guild in guild_ids:
                 if guild_ids.index(guild) < len(guild_ids)-1:
-                    await self.motoko.tree.sync(guild=discord.Object(id=guild))
+                    await self.motoko.tree.sync(guild=Object(id=guild))
                 else:
-                    await self.motoko.tree.sync(guild=discord.Object(id=guild))
+                    await self.motoko.tree.sync(guild=Object(id=guild))
                     await ctx.reply(f'Command tree synchronized to **{len(guild_ids)} servers**')
         elif server and server.isdigit() and int(server) in guild_ids:
             guild = self.motoko.get_guild(int(server))
             if guild:
-                synced = await self.motoko.tree.sync(guild=discord.Object(id=guild.id))
+                synced = await self.motoko.tree.sync(guild=Object(id=guild.id))
                 await ctx.reply(f'**{len(synced)} commands** synchronized to **{guild.name}**')
         else:
             await ctx.reply(f'**{server}** is an invalid input')
