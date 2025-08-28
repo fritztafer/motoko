@@ -3,12 +3,8 @@
     "PREFIX": ".",
     "TESTING": 0,
     "DEVELOPER": {
-        "USERS": [
-            
-        ],
-        "GUILDS": [
-            
-        ]
+        "USERS": [],
+        "GUILDS": []
     },
     "BLACKLIST": {
         "USERS": [],
