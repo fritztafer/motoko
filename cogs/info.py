@@ -32,10 +32,9 @@ class Info(commands.Cog):
     @decorators.sync()
     async def about(self, ctx: commands.Context[Motoko]):
         about = [
-            'I am a Discord bot inspired by Major Kusanagi from Ghost in the Shell.',
-            'Developed by <@234456546715762688> using the discord.py wrapper.',
-            'You may add me to your server with this link:',
-            'https://discord.com/oauth2/authorize?client_id=1265358841286230016&scope=bot'
+            'I am a Discord bot inspired by Major Motoko Kusanagi from Ghost in the Shell.',
+            'Developed and self-hosted by <@234456546715762688> using the discord.py wrapper.',
+            '[Add me to your server.](https://discord.com/oauth2/authorize?client_id=1265358841286230016&scope=bot)'
         ]
         await ctx.reply('\n'.join(about))
 
