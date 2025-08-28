@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from state import state
-from util.fetches import config
 from util.logs import logger, motoko_log, log_command
 from typing import Any
 import asyncio
@@ -14,18 +13,15 @@ class Motoko(commands.Bot):
         super().__init__(*args, **kwargs)
 
     async def setup_hook(self):
-        state.testing = config.testing()
         state.all_guilds = [guild.id async for guild in self.fetch_guilds(limit=None, with_counts=False)]
-        state.ban_guilds = config.ban_guilds()
-        state.ban_users = config.ban_users()
-        state.dev_guilds = config.dev_guilds()
-        state.dev_users = config.dev_users()
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
                 await self.load_extension(f'cogs.{file[:-3]}')
 
         async def on_interaction(ctx: discord.Interaction[Any]):
             guild = self.get_guild(ctx.guild.id) if ctx.guild is not None else None
+            if state.testing and ctx.user.id not in state.dev_users:
+                return False
             if guild and guild.id in state.ban_guilds:
                 await guild.leave()
                 return False
@@ -37,6 +33,8 @@ class Motoko(commands.Bot):
 
     async def on_message(self, ctx: discord.Message):
         guild = self.get_guild(ctx.guild.id) if ctx.guild is not None else None
+        if state.testing and ctx.author.id not in state.dev_users:
+            return
         if guild and guild.id in state.ban_guilds:
             await guild.leave()
             return
@@ -84,8 +82,8 @@ async def motoko():
     motoko_log()
     logger.info('startup initiated')
 
-    TOKEN = config.token()
-    PREFIX = config.prefix()
+    TOKEN = state.token
+    PREFIX = state.prefix
 
     async with Motoko(
         command_prefix=commands.when_mentioned_or(PREFIX),

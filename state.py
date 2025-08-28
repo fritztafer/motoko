@@ -1,17 +1,21 @@
+from util.fetches import config
+
 class State:
     def __init__(self):
-        self.testing: int
-        self.all_guilds: list[int] = []
-        self.ban_guilds: list[int] = []
-        self.ban_users: list[int] = []
-        self.dev_guilds: list[int] = []
-        self.dev_users: list[int] = []
+        self.token: str = config.token()
+        self.prefix: str = config.prefix()
+        self.testing: int = config.testing()
+        self.all_guilds: list[int]
+        self.ban_guilds: list[int] = config.ban_guilds()
+        self.ban_users: list[int] = config.ban_users()
+        self.dev_guilds: list[int] = config.dev_guilds()
+        self.dev_users: list[int] = config.dev_users()
 
-    def add_all_guild(self, guild_id: int):
+    def add_guild(self, guild_id: int):
         if guild_id not in self.all_guilds:
             self.all_guilds.append(guild_id)
 
-    def del_all_guild(self, guild_id: int):
+    def del_guild(self, guild_id: int):
         if guild_id in self.all_guilds:
             self.all_guilds.remove(guild_id)
 
@@ -47,4 +51,4 @@ class State:
         if user_id in self.dev_users:
             self.dev_users.remove(user_id)
 
-state = State()
+state: State = State()

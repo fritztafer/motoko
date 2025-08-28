@@ -2,22 +2,27 @@ import discord
 from discord.ext import commands
 from motoko import Motoko
 import util.decorators as decorators
-from util.fetches import config
 from state import state
-from typing import Literal, cast
+from typing import Literal, List, cast
 from importlib import reload, import_module
 import sys
+import json
 
 class Dev(commands.Cog):
     def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
     # evaluate
-    @commands.hybrid_command(name='eval', description='evaluate input')
+    @commands.hybrid_command(name='eval', description='evaluate string')
     @decorators.dev_lock()
     @decorators.sync(dev=True)
-    async def evaluate(self, ctx: commands.Context[Motoko], *, object: str):
-        await ctx.reply(f'```{eval(object)}```')
+    async def evaluate(self, ctx: commands.Context[Motoko], *, string: str):
+        evaluation = eval(string)
+        if evaluation is state.token or any(sub in string for sub in ['__', 'import', 'with', 'sys']):
+            evaluation = 'I have been programmed to deny this request.'
+        else:
+            evaluation = f'```{evaluation}```'
+        await ctx.reply(evaluation)
 
     # sync
     @commands.hybrid_command(name='sync', description='sync command tree')
@@ -109,25 +114,40 @@ class Dev(commands.Cog):
     @decorators.dev_lock()
     @decorators.sync(dev=True)
     async def conf_read(self, ctx: commands.Context[Motoko], object: Literal['developer','blacklist'], list: Literal['users','guilds']):
-        try:
-            object_literal = cast(Literal['DEVELOPER', 'BLACKLIST'], object.upper())
-            list_literal = cast(Literal['USERS', 'GUILDS'], list.upper())
-            result = config.read(object_literal, list_literal)
-            await ctx.reply(f'{object} {list}: {result}')
-        except Exception as error:
-            await ctx.reply(f'could not fetch {object} {list}: {error}')
+        with open('./config.json', 'r') as file:
+            config = json.loads(file.read())
+
+        object_literal = cast(Literal['DEVELOPER', 'BLACKLIST'], object.upper())
+        list_literal = cast(Literal['USERS', 'GUILDS'], list.upper())
+        result = config[object_literal][list_literal]
+        await ctx.reply(f'{object} {list}: {result}')
 
     # confw
     @commands.hybrid_command(name='confw', description='write to configuration file')
     @decorators.dev_lock()
     @decorators.sync(dev=True)
     async def conf_write(self, ctx: commands.Context[Motoko], action: Literal['add','del'], object: Literal['developer','blacklist'], list: Literal['users','guilds'], id: str):
-        try:
-            id_int: int = int(id)
-            object_literal = cast(Literal['DEVELOPER', 'BLACKLIST'], object.upper())
-            list_literal = cast(Literal['USERS', 'GUILDS'], list.upper())
-            result = 'added to' if action == 'add' else 'deleted from'
-            config.write(action, object_literal, list_literal, id_int)
+        id_int: int = int(id)
+        object_literal = cast(Literal['DEVELOPER', 'BLACKLIST'], object.upper())
+        list_literal = cast(Literal['USERS', 'GUILDS'], list.upper())
+        with open('./config.json', 'r') as file:
+            config = json.loads(file.read())
+        ids: List[int] = config[object_literal][list_literal]
+        success: bool = False
+        if action == 'add':
+            if id_int not in ids:
+                config[object_literal][list_literal].append(id_int)
+                success = True
+        elif action == 'del':
+            if id_int in ids:
+                config[object_literal][list_literal].remove(id_int)
+                success = True
+        result = '**added** to' if action == 'add' else '**deleted** from'
+        if not success:
+            result = '**not** ' + result
+        else:
+            with open('./config.json', 'w') as file:
+                json.dump(config, file, indent=4)
             if action == 'add':
                 if object == 'developer':
                     if list == 'users':
@@ -154,9 +174,7 @@ class Dev(commands.Cog):
                 if id_int in [guild.id for guild in self.motoko.guilds]:
                     guild = self.motoko.get_guild(id_int)
                     await guild.leave() if guild else guild
-            await ctx.reply(f'{id} {result} {object} {list}')
-        except Exception as error:
-            await ctx.reply(f'{id} could not be {object} {list}: {error}')
+        await ctx.reply(f'{id} {result} {object} {list}')
 
     # joined
     @commands.hybrid_command(name='joined', description='return information about joined servers')

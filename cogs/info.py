@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands
 from motoko import Motoko
+import util.decorators as decorators
 from datetime import timedelta
 import random
-import util.decorators as decorators
+import time
 
 class Info(commands.Cog):
     def __init__(self, motoko: Motoko):
@@ -34,7 +35,7 @@ class Info(commands.Cog):
             'I am a Discord bot inspired by Major Kusanagi from Ghost in the Shell.',
             'Developed by <@234456546715762688> using the discord.py wrapper.',
             'You may add me to your server with this link:',
-            'https://discord.com/oauth2/authorize?client_id=1265358841286230016&permissions=0&integration_type=0&scope=bot'
+            'https://discord.com/oauth2/authorize?client_id=1265358841286230016&scope=bot'
         ]
         await ctx.reply('\n'.join(about))
 
@@ -71,6 +72,15 @@ class Info(commands.Cog):
         offset_str = f'{offset:+03}:00'
         formatted_time = shifted_time.strftime('%b %d, %Y %I:%M %p').replace(' 0', ' ')
         await ctx.reply(f'{formatted_time} {offset_str} (UTC{offset:+})')
+
+    # timer
+    @commands.hybrid_command(name='timer', aliases=['countdown'], description='return countdown timer for given minutes')
+    @decorators.sync()
+    async def timer(self, ctx: commands.Context[Motoko], minutes: int):
+        now = int(time.time())
+        future = now + (minutes * 60)
+        timer = f'<t:{future}:R>'
+        await ctx.reply(timer)
 
     # echo
     @commands.hybrid_command(name='echo', description='return input')
