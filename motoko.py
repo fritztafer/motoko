@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from state import state
-from util.logs import logger, motoko_log, log_command
+from utils.logs import logger, motoko_log, log_command
 from typing import Any
 import asyncio
 import os

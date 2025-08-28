@@ -1,4 +1,4 @@
-from util.fetches import config
+from utils.fetches import config
 
 class State:
     def __init__(self):
