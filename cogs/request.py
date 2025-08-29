@@ -48,5 +48,17 @@ class Req(commands.Cog):
             message = '"The only quote currently available is this one."\n**Fritz**'
         await ctx.reply(message)
 
+    # random
+    @commands.hybrid_command(name='random', description='return a random fact')
+    @decorators.sync()
+    async def random(self, ctx: commands.Context[Motoko]):
+        response = request('https://uselessfacts.jsph.pl/api/v2/facts/random')
+        if response.status_code == 200:
+            response = response.json()
+            message = response['text']
+        else:
+            message = 'Quite randomly no facts are available.'
+        await ctx.reply(message)
+
 async def setup(motoko: Motoko):
     await motoko.add_cog(Req(motoko))
