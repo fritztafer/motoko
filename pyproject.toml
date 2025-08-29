@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "motoko"
 description = "A modular Discord bot"
-version = "2025.8.25"
-requires-python = ">=3.8"
+version = "2025.8.29"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
     {name = "Fritz", email = "fritz@g01iath.online"}
@@ -15,6 +15,7 @@ authors = [
 dependencies = [
     "discord.py>=2.6.2",
     "requests>=2.32.5",
+    "tzdata",
 ]
 
 [project.urls]

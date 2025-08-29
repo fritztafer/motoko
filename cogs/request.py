@@ -2,17 +2,15 @@ from discord.ext import commands
 from motoko import Motoko
 import utils.decorators as decorators
 from utils.fetches import request
-from typing import Literal
-from datetime import datetime
 
 class Req(commands.Cog):
     def __init__(self, motoko: Motoko):
         self.motoko = motoko
 
-    # catpic
-    @commands.hybrid_command(name='catpic', description='return cat picture')
+    # cat
+    @commands.hybrid_command(name='cat', description='return cat picture')
     @decorators.sync()
-    async def cat_pic(self, ctx: commands.Context[Motoko]):
+    async def cat(self, ctx: commands.Context[Motoko]):
         response = request('https://api.thecatapi.com/v1/images/search')
         if response.status_code == 200:
             response = response.json()[0]
@@ -48,21 +46,6 @@ class Req(commands.Cog):
             message = '"' + quote + '"\n**' + author + '**'
         else:
             message = '"The only quote currently available is this one."\n**Fritz**'
-        await ctx.reply(message)
-
-    # time
-    @commands.hybrid_command(name='time', aliases=['now'], description='return current time')
-    @decorators.sync()
-    async def time(self, ctx: commands.Context[Motoko], timezone: Literal['US/Pacific','US/Mountain','US/Central','US/Eastern','US/Hawaii','US/Alaska','Brazil/East','Europe/London','Europe/Berlin','Europe/Moscow','Asia/Dubai','Asia/Singapore','Asia/Shanghai','Asia/Tokyo','Australia/Sydney','Pacific/Auckland']):
-        response = request(f'http://worldtimeapi.org/api/timezone/{timezone}')
-        if response.status_code == 200:
-            response = response.json()
-            time = datetime.fromisoformat(response['datetime']).strftime("%B %d, %Y %I:%M %p").replace(' 0', ' ')
-            abbreviation = response['abbreviation']
-            utc_offset = response['utc_offset']
-            message = f'{time} {abbreviation} ({utc_offset} UTC)'
-        else:
-            message = 'Time service is unavailable.'
         await ctx.reply(message)
 
 async def setup(motoko: Motoko):
